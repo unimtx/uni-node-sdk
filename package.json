@@ -1,0 +1,31 @@
+{
+  "name": "uni-sdk",
+  "version": "0.2.0",
+  "description": "The official Unimatrix SDK for Node.js.",
+  "main": "./lib",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "build": "rm -rf lib && tsc"
+  },
+  "repository": "https://github.com/unimtx/uni-node-sdk",
+  "author": "Unimatrix<dev@unimtx.com>",
+  "license": "MIT",
+  "homepage": "https://unimtx.com",
+  "keywords": [
+    "unimatrix",
+    "sms",
+    "messaging",
+    "2fa",
+    "verification",
+    "sdk",
+    "api"
+  ],
+  "dependencies": {
+    "axios": "^0.27.2",
+    "create-hmac": "^1.1.7"
+  },
+  "devDependencies": {
+    "@types/create-hmac": "^1.1.0",
+    "@types/node": "^18.11.15"
+  }
+}
