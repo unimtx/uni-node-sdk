@@ -1,8 +1,9 @@
 import axios, { AxiosResponse } from 'axios'
-import { DEFAULT_ENDPOINT, DEFAULT_SIGNING_ALGORITHM, REQUEST_ID_HEADER_KEY, USER_AGENT } from './constant'
+import { ENV, DEFAULT_ENDPOINT, DEFAULT_SIGNING_ALGORITHM, REQUEST_ID_HEADER_KEY, USER_AGENT } from './constant'
 import { UniSigner } from './signer'
 import { UniConfig, UniSigningAlgorithm } from './types'
 import MessageService from './services/messages'
+import OtpService from './services/otp'
 
 export class UniRequestError extends Error {
   requestId?: string
@@ -15,8 +16,13 @@ export class UniRequestError extends Error {
     super(message)
     this.code = code + ''
     this.status = status || 0
-    this.raw = raw
     this.requestId = raw?.headers && raw.headers[REQUEST_ID_HEADER_KEY]
+
+    Object.defineProperty(this, 'raw', {
+      enumerable: false,
+      writable: false,
+      value: raw,
+    })
   }
 }
 
@@ -31,8 +37,13 @@ export class UniResponse {
     this.code = response.data.code
     this.data = response.data.data
     this.status = response.status
-    this.raw = response
     this.requestId = response.headers && response.headers[REQUEST_ID_HEADER_KEY]
+
+    Object.defineProperty(this, 'raw', {
+      enumerable: false,
+      writable: false,
+      value: response,
+    })
   }
 }
 
@@ -47,12 +58,19 @@ export class UniClient {
   signer?: UniSigner
   userAgent: string
   messages: MessageService
+  otp: OtpService
 
-  constructor(config: UniConfig) {
-    const { accessKeyId, accessKeySecret, endpoint, signingAlgorithm, userAgent } = config
+  constructor(config?: UniConfig) {
+    const {
+      accessKeyId = ENV.UNIMTX_ACCESS_KEY_ID,
+      accessKeySecret = ENV.UNIMTX_ACCESS_KEY_SECRET,
+      endpoint = ENV.UNIMTX_ENDPOINT,
+      signingAlgorithm,
+      userAgent,
+    } = config || {}
 
     this.endpoint = endpoint || DEFAULT_ENDPOINT
-    this.accessKeyId = accessKeyId
+    this.accessKeyId = accessKeyId as string
     this.signingAlgorithm = signingAlgorithm || DEFAULT_SIGNING_ALGORITHM
     this.userAgent = userAgent || USER_AGENT
 
@@ -65,6 +83,7 @@ export class UniClient {
     }
 
     this.messages = new MessageService(this)
+    this.otp = new OtpService(this)
   }
 
   private sign(query: any) {
@@ -99,7 +118,7 @@ export class UniClient {
         headers: {
           'User-Agent': this.userAgent,
           'Content-Type': 'application/json;charset=utf-8',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         data,
         validateStatus: () => true,

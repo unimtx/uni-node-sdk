@@ -1,6 +1,7 @@
 import { UniSigner } from './signer';
 import { UniConfig, UniSigningAlgorithm } from './types';
 import MessageService from './services/messages';
+import OtpService from './services/otp';
 export declare class UniRequestError extends Error {
     requestId?: string;
     code: string;
@@ -28,7 +29,8 @@ export declare class UniClient {
     signer?: UniSigner;
     userAgent: string;
     messages: MessageService;
-    constructor(config: UniConfig);
+    otp: OtpService;
+    constructor(config?: UniConfig);
     private sign;
     request(action: string, data: any): Promise<UniResponse>;
 }
